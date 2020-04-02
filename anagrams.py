@@ -9,17 +9,32 @@ for an arbitrary list of strings.
 """
 
 import sys
+from collections import defaultdict
+import cProfile
+import pstats
+import functools
 
 # Your name here, and any other people/sources who helped.
 # Give credit where credit is due.
-__author__ = "Justin Miller"
+__author__ = "Justin Miller with major help from Piero during a 1:1 on 4/2"
 
+def profile(func):
+    def inner(*args, **kwargs):
+        p = cProfile.Profile()
+        p.enable()
+        result = func(*args, **kwargs)
+        p.disable()
+        ps = pstats.Stats(p).sort_stats("cumulative")
+        ps.print_stats()
+        return result
+    return inner
 
 def alphabetize(string):
     """Returns alphabetized version of the string"""
     return "".join(sorted(string.lower()))
 
 
+# @profile
 def find_anagrams(words):
     """
     Returns a dictionary with keys that are alphabetized words and values
@@ -27,14 +42,11 @@ def find_anagrams(words):
     Example:
     {'dgo': ['dog'], 'act': ['cat', 'act']}
     """
-    # print(words)
-    alpha_f = alphabetize
-    anagrams = {
-        alpha_f(word): [
-            w for w in words
-            if alpha_f(w) == alpha_f(word)]
-        for word in words}
-    # print(anagrams)
+ 
+    anagrams = defaultdict(list)
+    for word in words:
+        anagrams[alphabetize(word)].append(word)
+            
     return anagrams
 
 
